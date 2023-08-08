@@ -1,0 +1,247 @@
+    <main class="content center">
+      <h2>
+        Welcome, {{displayName}}!
+      </h2>
+      <section>
+        <h3>
+          Your name:
+        </h3>
+        <div id="display-name"></div>
+      </section>
+      <section>
+        <h3 class="mdc-typography mdc-typography--headline6">
+          Your registered passkeys:
+        </h3>
+        <div id="list"></div>
+      </section>
+      <section>
+        <h3>
+          Your sub:
+        </h3>
+        <div id="sub"></div>
+      </section>
+      <p id="message" class="instructions"></p>
+      <mwc-button id="create-passkey" class="hidden" icon="fingerprint" raised>Create a passkey</mwc-button>
+      <mwc-button raised><a href="/federate">Federate Identity</a></mwc-button>
+      <mwc-button><a href="/auth/signout">Sign out</a></mwc-button>
+    </main>
+    <script type="module">
+      import { $, _fetch, loading, registerCredential, updateCredential, unregisterCredential, unregisterSub } from '/client.js';
+      import { html, render } from 'https://unpkg.com/lit-html@2.6.1/lit-html.js?module';
+
+      // $('#code').addEventListener('click', e => {
+      //   location.href = 'https://glitch.com/edit/#!/{{project_name}}';
+      // });
+
+      /**
+       * Change and update the user's display name.
+       */
+      async function changeDisplayName(e) {
+        const newName = prompt('Enter a new display name', e.target.dataset.displayName);
+        if (newName) {
+          loading.start();
+          await _fetch('/auth/updateDisplayName', { newName });
+          loading.stop();
+          renderDisplayName();
+        }
+      }
+
+      /**
+       * Render the user's display name.
+       */
+      async function renderDisplayName() {
+        const res = await _fetch('/auth/userinfo');
+        render(html`
+        <mwc-list>
+          <mwc-list-item>
+            <div class="list-item">
+              <div class="entity-name">
+                <span>${res.displayName || res.username}</span>
+              </div>
+              <div class="buttons">
+                <mwc-icon-button
+                  data-display-name="${res.displayName || res.username }"
+                  @click="${changeDisplayName}"
+                  title="Edit your display name"
+                  icon="edit"></mwc-icon-button>
+              </div>
+            </div>
+          </mwc-list-item>
+        <mwc-list>`, $('#display-name'));
+      };
+
+      /**
+       * Render the user's sub.
+       */
+      async function renderSub() {
+        const res = await _fetch('/auth/userinfo');
+        render(html`
+        <mwc-list>
+          <mwc-list-item>
+            <div class="list-item">
+              <div class="entity-name">
+                <span>${res.sub}</span>
+              </div>
+              <div class="buttons">
+                <mwc-icon-button
+                  data-display-name="${res.sub}"
+                  @click="${deleteSub}"
+                  title="No identity federation"
+                  icon="delete"></mwc-icon-button>
+              </div>
+            </div>
+          </mwc-list-item>
+        <mwc-list>`, $('#sub'));
+      };
+
+
+      /**
+       * Rename and update the credential name.
+       */
+      async function rename(e) {
+        const { credId, name } = e.target.dataset;
+        const newName = prompt('Enter a new credential name.', name);
+        if (newName.length === 0) return;
+        try {
+          loading.start();
+          await updateCredential(credId, newName);
+          await renderCredentials();
+          loading.stop();
+        } catch (e) {
+          loading.stop();
+          console.error(e);
+          alert(e.message);
+        }
+      };
+
+      /**
+       * Remove and delete a credential.
+       */
+      async function remove(e) {
+        if (!confirm('Do you really want to remove this credential?')) return;
+
+        try {
+          loading.start();
+          await unregisterCredential(e.target.dataset.credId);
+          await renderCredentials();
+          loading.stop();
+        } catch (e) {
+          loading.stop();
+          console.error(e);
+          alert(e.message);
+        }
+      };
+
+      /**
+       * Delete sub.
+       */
+      async function deleteSub(e) {
+        if (!confirm('Do you really want to delete this sub?')) return;
+
+        try {
+          loading.start();
+          await unregisterSub(e.target.dataset.credId);
+          await renderSub();
+          loading.stop();
+        } catch (e) {
+          loading.stop();
+          console.error(e);
+          alert(e.message);
+        }
+      };
+
+      const createPasskey = $('#create-passkey');
+
+     // Is WebAuthn available on this browser?
+      if (window.PublicKeyCredential &&
+          PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
+          PublicKeyCredential.isConditionalMediationAvailable) {
+        try {
+          // Are UVPAA and conditional UI available on this browser?
+          const results = await Promise.all([
+            PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
+            PublicKeyCredential.isConditionalMediationAvailable()
+          ]);
+          if (results.every(r => r === true)) {
+            // If both are available, reveal the "Create a passkey" button.
+            createPasskey.classList.remove('hidden');
+          } else {
+            // If either is not available, show a message.
+            $('#message').innerText = 'This device does not support passkeys.';
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        // If the condition does not match, show a message.
+        $('#message').innerText = 'This device does not support passkeys.';
+      }
+
+      /**
+       * Render the list of saved credentials.
+       */
+      async function renderCredentials() {
+        const res = await _fetch('/auth/getKeys');
+        const list = $('#list');
+        const creds = html`${res.length > 0 ? html`
+        <mwc-list>
+          ${res.map(cred => html`
+            <mwc-list-item>
+              <div class="list-item">
+                <div class="entity-name">
+                  <span>${cred.name || 'Unnamed' }</span>
+                </div>
+                <div class="buttons">
+                  <mwc-icon-button
+                    data-cred-id="${cred.id}"
+                    data-name="${cred.name || 'Unnamed' }"
+                    @click="${rename}"
+                    icon="edit"></mwc-icon-button>
+                  <mwc-icon-button
+                    data-cred-id="${cred.id}"
+                    @click="${remove}"
+                    icon="delete"></mwc-icon-button>
+                </div>
+              </div>
+            </mwc-list-item>`)}
+        </mwc-list>` : html`
+        <mwc-list>
+          <mwc-list-item>No credentials found.</mwc-list-item>
+        </mwc-list>`}`;
+        render(creds, list);
+      };
+
+      /**
+       * Create a new paskey and register the credential.
+       */
+      async function register() {
+        try {
+          loading.start();
+          await registerCredential();
+          await renderCredentials();
+          loading.stop();
+        } catch (e) {
+          // Stop the loading UI
+          loading.stop();
+          // 'InvalidStateError' indicates a passkey already exists on the device.
+          if (e.name === 'InvalidStateError') {
+            alert('A passkey already exists for this device.');
+          // `NotAllowedError` indicates the user canceled the operation.
+          } else if (e.name === 'NotAllowedError') {
+            return;
+          // Show other errors in an alert.
+          } else {
+            alert(e.message);
+            console.error(e);
+          }
+        }
+      };
+      
+      loading.start();
+      renderDisplayName();
+      await renderCredentials();
+      renderSub();
+      loading.stop();
+
+      createPasskey.addEventListener('click', register);
+    </script>
