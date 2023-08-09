@@ -1,4 +1,4 @@
-# passkeys-demo
+# Seccamp 2023 Authentication & Identity Federation
 
 passkeys-demo is a demo web application developers can have a look and try themselves to learn how to develop a similar experience.
 
