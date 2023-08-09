@@ -27,10 +27,8 @@ import useragent from 'express-useragent';
 import { getFirestore } from 'firebase-admin/firestore';
 import { FirestoreStore } from '@google-cloud/connect-firestore';
 import { auth } from './libs/auth.mjs';
-
 import { Issuer } from 'openid-client';
 import { generators } from 'openid-client';
-
 import { Users } from './libs/db.mjs';
 
 const views = path.join(__dirname, 'views');
@@ -63,7 +61,7 @@ app.use(session({
   }
 }));
 
-const RP_NAME = 'Passkeys Demo';
+const RP_NAME = 'Seccamp 2023 Authentication & Identity Federation';
 
 app.use((req, res, next) => {
   process.env.HOSTNAME = req.hostname;
@@ -170,7 +168,7 @@ app.get('/.well-known/passkey-endpoints', (req, res) => {
 app.use('/auth', auth);
 
 /**
- * TODO 4-1. OpenID Connect¡ÊOAuth 2.0¡Ë¥¯¥é¥¤¥¢¥ó¥ÈÀßÄê
+ * TODO 4-1. OpenID Connectï¼ˆOAuth 2.0ï¼‰ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆè¨­å®š
  */
 const CLIENT_ID = '551667838986-u04inmb4f3m040k55el9vvl6a73urbj3.apps.googleusercontent.com';
 const CLIENT_SECRET = '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';
@@ -182,7 +180,7 @@ const googleIssuer = await Issuer.discover('https://accounts.google.com');
 app.get('/federate', (req, res) => {
   
   /**
-   * TODO 4-2. ¥¯¥é¥¤¥¢¥ó¥È½é´ü²½
+   * TODO 4-2. ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆåˆæœŸåŒ–
    */
   const client = new googleIssuer.Client({
     client_id: CLIENT_ID,
@@ -194,14 +192,14 @@ app.get('/federate', (req, res) => {
   }); // => Client
 
   /**
-   * TODO 4-3. nonce¤ò¥»¥Ã¥·¥ç¥ó¤ËÅĞÏ¿
+   * TODO 4-3. nonceã‚’ã‚»ãƒƒã‚·ãƒ§ãƒ³ã«ç™»éŒ²
    */
   const nonce = generators.nonce();
   req.session.nonce = nonce;
   console.log('set nonce %0', req.session.nonce);
 
   /**
-   * TODO 4-4. Authorization¥ê¥¯¥¨¥¹¥ÈURLÀ¸À®
+   * TODO 4-4. Authorizationãƒªã‚¯ã‚¨ã‚¹ãƒˆURLç”Ÿæˆ
    */
   const url = client.authorizationUrl({
     //scope: 'openid email profile',
@@ -215,7 +213,7 @@ app.get('/federate', (req, res) => {
   console.log(url);
 
   /**
-   * TODO 4-5. Authorization¥ê¥¯¥¨¥¹¥È¡ÊÆ±°Õ²èÌÌÉ½¼¨¡Ë
+   * TODO 4-5. Authorizationãƒªã‚¯ã‚¨ã‚¹ãƒˆï¼ˆåŒæ„ç”»é¢è¡¨ç¤ºï¼‰
    */
   return res.redirect(307, url);
 });
@@ -223,7 +221,7 @@ app.get('/federate', (req, res) => {
 app.get('/cb', (req, res, next) => {
 
   /**
-   * TODO 4-6. ¥¯¥é¥¤¥¢¥ó¥È½é´ü²½
+   * TODO 4-6. ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆåˆæœŸåŒ–
    */
   const client = new googleIssuer.Client({
     client_id: CLIENT_ID,
@@ -246,7 +244,7 @@ app.get('/cb', (req, res, next) => {
       const check = {};
 
       /**
-       * TODO 4-7. nonce¸¡¾Ú
+       * TODO 4-7. nonceæ¤œè¨¼
        */
       check.nonce = req.session.nonce;
 
@@ -261,13 +259,14 @@ app.get('/cb', (req, res, next) => {
       console.log('sub %0', tokenSet.claims().sub);
 
       /**
-       * TODO 4-8. ¥æ¡¼¥¶¡¼¼±ÊÌ»Ò¤ò¼èÆÀ
+       * TODO 4-8. ãƒ¦ãƒ¼ã‚¶ãƒ¼è­˜åˆ¥å­ã‚’å–å¾—
        */
       const sub = tokenSet.claims().sub;
 
       if (!req.session['signed-in'] || !req.session.username) {
+
         /**
-         * TODO 5-1. ÅĞÏ¿ºÑ¤ß¤Î¥æ¡¼¥¶¡¼¼±ÊÌ»Ò¤Ç¥í¥°¥¤¥ó
+         * TODO 5-1. ç™»éŒ²æ¸ˆã¿ã®ãƒ¦ãƒ¼ã‚¶ãƒ¼è­˜åˆ¥å­ã§ãƒ­ã‚°ã‚¤ãƒ³
          */
         const user = await Users.findBySub(sub);
         if (!user) {
@@ -278,10 +277,13 @@ app.get('/cb', (req, res, next) => {
         req.session.username = user.username;
         req.session['signed-in'] = 'yes';
         console.log('sign-in with sub %0', sub);
+
       } else {
+
         /**
-         * TODO 4-9. ¥æ¡¼¥¶¡¼¼±ÊÌ»Ò¤ò¥¢¥«¥¦¥ó¥È¤ËÅĞÏ¿
+         * TODO 4-9. ãƒ¦ãƒ¼ã‚¶ãƒ¼è­˜åˆ¥å­ã‚’ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã«ç™»éŒ²
          */
+
         const user = await Users.findByUsername(req.session.username);
         user.sub = sub;
         await Users.update(user);

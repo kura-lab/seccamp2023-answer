@@ -111,7 +111,7 @@ export async function registerCredential() {
   // Use platform authenticator and discoverable credential
   options.authenticatorSelection = {
     /**
-      * TODO 1-1. ¥×¥é¥Ã¥È¥Õ¥©¡¼¥à´Ö¤ÇÆ±´ü¤µ¤ì¤ë¥Ñ¥¹¥­¡¼¤Î¤ß¤òÅĞÏ¿
+      * TODO 1-1. ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ é–“ã§åŒæœŸã•ã‚Œã‚‹ãƒ‘ã‚¹ã‚­ãƒ¼ã®ã¿ã‚’ç™»éŒ²
       */
     authenticatorAttachment: 'platform',
     requireResidentKey: true
@@ -119,7 +119,7 @@ export async function registerCredential() {
 
   // Invoke WebAuthn create
   /**
-   * TODO 1-2. ¥Ñ¥¹¥­¡¼¤ÎÅĞÏ¿
+   * TODO 1-2. ãƒ‘ã‚¹ã‚­ãƒ¼ã®ç™»éŒ²
    */
   const cred = await navigator.credentials.create({
     publicKey: options,
@@ -169,14 +169,14 @@ export async function authenticate(conditional = false) {
   options.allowCredentials = [];
 
   /**
-   * TODO 2-4. Ç§¾Ú¸Æ¤Ó½Ğ¤·
+   * TODO 2-4. èªè¨¼å‘¼ã³å‡ºã—
    */
   // Invoke WebAuthn get
   const cred = await navigator.credentials.get({
     publicKey: options,
     // Request a conditional UI
     /**
-     * TODO 2-5. conditional¤ò»ØÄê¤ÇÅĞÏ¿ºÑ¤ß¥Ñ¥¹¥­¡¼¤òÉ½¼¨
+     * TODO 2-5. conditionalã‚’æŒ‡å®šã§ç™»éŒ²æ¸ˆã¿ãƒ‘ã‚¹ã‚­ãƒ¼ã‚’è¡¨ç¤º
      */
     mediation: conditional ? 'conditional' : 'optional'
   });

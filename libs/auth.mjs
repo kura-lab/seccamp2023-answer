@@ -253,11 +253,13 @@ router.post('/registerRequest', csrfCheck, sessionCheck, async (req, res) => {
     }
     // Set `authenticatorSelection`.
     const authenticatorSelection = {
+
       /**
-       * TODO 1-1. ¥×¥é¥Ã¥È¥Õ¥©¡¼¥à´Ö¤ÇÆ±´ü¤µ¤ì¤ë¥Ñ¥¹¥­¡¼¤Î¤ß¤òÍ×µá
+       * TODO 1-1. ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ é–“ã§åŒæœŸã•ã‚Œã‚‹ãƒ‘ã‚¹ã‚­ãƒ¼ã®ã¿ã‚’è¦æ±‚
        */
       authenticatorAttachment: 'platform',
       requireResidentKey: true
+
     }
     const attestationType = 'none';
 
@@ -276,6 +278,9 @@ router.post('/registerRequest', csrfCheck, sessionCheck, async (req, res) => {
     });
 
     // Keep the challenge value in a session.
+    /**
+     * TODO 1-2. challengeã‚’ã‚»ãƒƒã‚·ãƒ§ãƒ³ã«ç™»éŒ²
+     */
     req.session.challenge = options.challenge;
 
     // Respond with the registration options.
@@ -355,7 +360,7 @@ router.post('/signinRequest', csrfCheck, async (req, res) => {
     const options = await generateAuthenticationOptions({
       rpID: process.env.HOSTNAME,
       /**
-       * TODO 2-3. ¥¢¥«¥¦¥ó¥È¥»¥ì¥¯¥¿¤òÉ½¼¨
+       * TODO 2-3. ã‚¢ã‚«ã‚¦ãƒ³ãƒˆã‚»ãƒ¬ã‚¯ã‚¿ã‚’è¡¨ç¤º
        */
       allowCredentials: [],
     });
