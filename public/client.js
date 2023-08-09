@@ -110,11 +110,17 @@ export async function registerCredential() {
 
   // Use platform authenticator and discoverable credential
   options.authenticatorSelection = {
+    /**
+      * TODO 1-1. プラットフォーム間で同期されるパスキーのみを登録
+      */
     authenticatorAttachment: 'platform',
     requireResidentKey: true
   }
 
   // Invoke WebAuthn create
+  /**
+   * TODO 1-2. パスキーの登録
+   */
   const cred = await navigator.credentials.create({
     publicKey: options,
   });
@@ -162,10 +168,16 @@ export async function authenticate(conditional = false) {
   // `allowCredentials` empty array invokes an account selector by discoverable credentials.
   options.allowCredentials = [];
 
+  /**
+   * TODO 2-4. 認証呼び出し
+   */
   // Invoke WebAuthn get
   const cred = await navigator.credentials.get({
     publicKey: options,
     // Request a conditional UI
+    /**
+     * TODO 2-5. conditionalを指定で登録済みパスキーを表示
+     */
     mediation: conditional ? 'conditional' : 'optional'
   });
 

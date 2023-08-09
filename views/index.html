@@ -12,7 +12,7 @@
            class="mdc-text-field__input"
            aria-labelledby="username-label"
            name="username"
-           autocomplete="username webauthn"
+           autocomplete="username webauthn" <!-- TODO 2-1. オートフィル一覧にパスキーを追加 -->
            autofocus />
           <span class="mdc-line-ripple"></span>
         </div>
@@ -64,6 +64,9 @@
           const cma= await PublicKeyCredential.isConditionalMediationAvailable();
           if (cma) {
             // If a conditional UI is supported, invoke the conditional `authenticate()` immediately.
+            /**
+             * TODO 2-2. オートフィルログイン呼び出し
+             */
             const user = await authenticate(true);
             if (user) {
               // When the user is signed in, redirect to the home page.

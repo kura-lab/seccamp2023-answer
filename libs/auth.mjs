@@ -253,6 +253,9 @@ router.post('/registerRequest', csrfCheck, sessionCheck, async (req, res) => {
     }
     // Set `authenticatorSelection`.
     const authenticatorSelection = {
+      /**
+       * TODO 1-1. プラットフォーム間で同期されるパスキーのみを要求
+       */
       authenticatorAttachment: 'platform',
       requireResidentKey: true
     }
@@ -351,6 +354,9 @@ router.post('/signinRequest', csrfCheck, async (req, res) => {
     // Use SimpleWebAuthn's handy function to create a new authentication request.
     const options = await generateAuthenticationOptions({
       rpID: process.env.HOSTNAME,
+      /**
+       * TODO 2-3. アカウントセレクタを表示
+       */
       allowCredentials: [],
     });
 

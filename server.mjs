@@ -169,6 +169,9 @@ app.get('/.well-known/passkey-endpoints', (req, res) => {
 
 app.use('/auth', auth);
 
+/**
+ * TODO 4-1. OpenID Connect（OAuth 2.0）クライアント設定
+ */
 const CLIENT_ID = '551667838986-u04inmb4f3m040k55el9vvl6a73urbj3.apps.googleusercontent.com';
 const CLIENT_SECRET = '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';
 const REDIRECT_URIS = ['http://localhost:8080/cb'];
@@ -178,6 +181,9 @@ const googleIssuer = await Issuer.discover('https://accounts.google.com');
 
 app.get('/federate', (req, res) => {
   
+  /**
+   * TODO 4-2. クライアント初期化
+   */
   const client = new googleIssuer.Client({
     client_id: CLIENT_ID,
     client_secret: CLIENT_SECRET,
@@ -187,10 +193,16 @@ app.get('/federate', (req, res) => {
     // token_endpoint_auth_method (default "client_secret_basic")
   }); // => Client
 
+  /**
+   * TODO 4-3. nonceをセッションに登録
+   */
   const nonce = generators.nonce();
   req.session.nonce = nonce;
   console.log('set nonce %0', req.session.nonce);
 
+  /**
+   * TODO 4-4. AuthorizationリクエストURL生成
+   */
   const url = client.authorizationUrl({
     //scope: 'openid email profile',
     scope: 'openid',
@@ -202,11 +214,17 @@ app.get('/federate', (req, res) => {
 
   console.log(url);
 
+  /**
+   * TODO 4-5. Authorizationリクエスト（同意画面表示）
+   */
   return res.redirect(307, url);
 });
 
 app.get('/cb', (req, res, next) => {
 
+  /**
+   * TODO 4-6. クライアント初期化
+   */
   const client = new googleIssuer.Client({
     client_id: CLIENT_ID,
     client_secret: CLIENT_SECRET,
@@ -226,6 +244,10 @@ app.get('/cb', (req, res, next) => {
       console.log('req.session.nonce %0', req.session.nonce);
 
       const check = {};
+
+      /**
+       * TODO 4-7. nonce検証
+       */
       check.nonce = req.session.nonce;
 
       // verify id token and extract sub claim
@@ -238,11 +260,15 @@ app.get('/cb', (req, res, next) => {
       // relate sub to login session
       console.log('sub %0', tokenSet.claims().sub);
 
+      /**
+       * TODO 4-8. ユーザー識別子を取得
+       */
       const sub = tokenSet.claims().sub;
 
-      //_fetch('/auth/registerSub', { sub });
-
       if (!req.session['signed-in'] || !req.session.username) {
+        /**
+         * TODO 5-1. 登録済みのユーザー識別子でログイン
+         */
         const user = await Users.findBySub(sub);
         if (!user) {
           console.log('have not created a user');
@@ -253,6 +279,9 @@ app.get('/cb', (req, res, next) => {
         req.session['signed-in'] = 'yes';
         console.log('sign-in with sub %0', sub);
       } else {
+        /**
+         * TODO 4-9. ユーザー識別子をアカウントに登録
+         */
         const user = await Users.findByUsername(req.session.username);
         user.sub = sub;
         await Users.update(user);

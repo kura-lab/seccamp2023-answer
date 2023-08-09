@@ -8,37 +8,36 @@
       </section>
     </main>
     <script type="module">
-      import { $, _fetch, loading, authenticate } from '/client.js';
+      //import { $, _fetch, loading, authenticate } from '/client.js';
 
-      // $('#code').addEventListener('click', e => {
-      //   location.href = 'https://glitch.com/edit/#!/{{project_name}}';
-      // });
+      //// $('#code').addEventListener('click', e => {
+      ////   location.href = 'https://glitch.com/edit/#!/{{project_name}}';
+      //// });
 
-      const redirect = (path) => {
-        location.href = path;
-      }
+      //const redirect = (path) => {
+      //  location.href = path;
+      //}
 
-      if (window.PublicKeyCredential) {
-        $('#social-login').addEventListener('click', async e => {
-          try {
-            loading.start();
-            const user = await authenticate();
-            if (user) {
-              redirect('/home');
-            } else {
-              throw new Error('User not found.');
-            }
-          } catch (e) {
-            loading.stop();
-            console.error(e);
-            if (e.name !== 'NotAllowedError') {
-              alert(e.message);
-            }
-          }
-        });
-      } else {
-        alert("WebAuthn isn't supported on this browser. Redirecting to a form.")
-        redirect('/');
-      }
-
+      //if (window.PublicKeyCredential) {
+      //  $('#social-login').addEventListener('click', async e => {
+      //    try {
+      //      loading.start();
+      //      const user = await authenticate();
+      //      if (user) {
+      //        redirect('/home');
+      //      } else {
+      //        throw new Error('User not found.');
+      //      }
+      //    } catch (e) {
+      //      loading.stop();
+      //      console.error(e);
+      //      if (e.name !== 'NotAllowedError') {
+      //        alert(e.message);
+      //      }
+      //    }
+      //  });
+      //} else {
+      //  alert("WebAuthn isn't supported on this browser. Redirecting to a form.")
+      //  redirect('/');
+      //}
     </script>

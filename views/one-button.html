@@ -29,6 +29,9 @@
         $('#passkey-signin').addEventListener('click', async e => {
           try {
             loading.start();
+            /**
+             * TODO 3. ワンボタンログイン呼び出し
+             */
             const user = await authenticate();
             if (user) {
               redirect('/home');
